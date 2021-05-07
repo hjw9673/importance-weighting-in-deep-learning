@@ -65,6 +65,9 @@ def set_arguments():
     parser.add_argument(
         '--num_classes', default=10, type=int,
         help='The number of class labels.')
+    parser.add_argument(
+        '--l2_penalty', default=0, type=float,
+        help='The lambda value of l2 regularization.')
     args = parser.parse_args()
 
     return args

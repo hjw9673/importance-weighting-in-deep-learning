@@ -52,7 +52,7 @@ if __name__ == "__main__":
             use_batchnorm=config.use_batchnorm
         ).to(device)
     elif config.model == "cnn":
-        pass
+        model = CustomCNN(config.num_classes).to(device)
 
     weights = torch.ones(config.num_classes)
     weights[config.class_a_index] = config.class_a_weight
@@ -60,7 +60,7 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss(weight=weights.to(device))
 
     learning_rate = config.lr
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay=config.l2_penalty)
     
     # 3-2. start training
     model_trained = train(model, train_loader, [test_ab_loader, test_others_loader], criterion, optimizer, config)
