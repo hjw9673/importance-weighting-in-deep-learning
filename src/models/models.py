@@ -1,8 +1,43 @@
 import torch
 import torch.nn as nn
 
+# Convolutional Networks
+class CustomCNN(nn.Module):
+    def __init__(self, num_classes):
+        super(CustomCNN, self).__init__()
+        self.conv_layers1 = nn.Sequential(
+            nn.Conv2d(3, 64, kernel_size=3, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(64, 64, kernel_size=3, bias=False),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)
+        )
+        self.conv_layers2 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 128, kernel_size=3, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 128, kernel_size=3, bias=False),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(2)
+        )
+        self.dense_layers = nn.Sequential(
+            nn.Linear(128*4*4, 512),
+            nn.ReLU(inplace=True),
+            nn.Linear(512, 128),
+            nn.ReLU(inplace=True),
+        )
+        self.fc = nn.Linear(128, num_classes)
+    def forward(self, x):
+        out = self.conv_layers1(x)
+        out = self.conv_layers2(out)
+        out = out.view(out.size(0), -1) # batch x 128 x 4 x 4 -> batch x (128*4*4)
+        out = self.dense_layers(out)
+        out = self.fc(out)
+        return out
+    
 
-# ResNet
+# Customized ResNet
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1, downsample=None, use_batchnorm=True):
         super(ResidualBlock, self).__init__()
