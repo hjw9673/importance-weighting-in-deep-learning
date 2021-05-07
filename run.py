@@ -1,3 +1,9 @@
+'''
+How to run this script:
+For example,
+
+$ python run.py --model=resnet --experiment_title=resnet_balanced_16_1_batchnorm_true --epoch=1000 --class_a_weight=16 --class_b_weight=1 --use_batchnorm=1
+'''
 import numpy as np
 import os
 import argparse
@@ -23,6 +29,7 @@ if __name__ == "__main__":
     # 1. setting
     config = set_arguments()
     set_seed(config.seeds)
+    print("Use CUDA: {}".format(torch.cuda.is_available()))
     
     # 2. read data
     loader_dict = create_dataloaders(
