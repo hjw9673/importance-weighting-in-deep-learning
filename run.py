@@ -2,7 +2,7 @@
 How to run this script:
 For example,
 
-$ python run.py --model=resnet --experiment_title=resnet_balanced_16_1_batchnorm_true --epoch=1000 --class_a_weight=16 --class_b_weight=1 --use_batchnorm=1
+$ python run.py --model=resnet --experiment_title=resnet_balanced_16_1_batchnorm_true --epoch=1000 --class_a_weight=16 --class_b_weight=1 --use_batchnorm=1 --l2_penalty=0
 '''
 import numpy as np
 import os
@@ -13,9 +13,6 @@ import torchvision.transforms as transforms
 import torch.nn as nn 
 from sklearn.metrics import classification_report
 import pickle
-import warnings
-from sklearn.exceptions import ConvergenceWarning
-warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
 # customized modules
 from src.utils.utils import set_seed, set_arguments
