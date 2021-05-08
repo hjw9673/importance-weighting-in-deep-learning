@@ -3,10 +3,7 @@ import torch
 import pickle
 from ..utils.utils import logging
 from tqdm import tqdm
-import warnings
 from sklearn.metrics import classification_report
-from sklearn.exceptions import ConvergenceWarning
-warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 def train(model, trainloader, testloaders, criterion, optimizer, config):
@@ -22,12 +19,16 @@ def train(model, trainloader, testloaders, criterion, optimizer, config):
     total_step = len(trainloader)
     num_epochs = config.epoch
     fractions = []
-    for epoch in tqdm(range(num_epochs)):
+    
+    for epoch in range(num_epochs):
+        total_loss = []
+        total_batch_size = 0
         model.train()
         for i, (images, labels) in enumerate(trainloader):
             images = images.to(device)
             labels = labels.to(device)
-
+            batch_size = images.size(0)
+            
             # Forward pass
             outputs = model(images)
             loss = criterion(outputs, labels)
@@ -36,10 +37,15 @@ def train(model, trainloader, testloaders, criterion, optimizer, config):
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-
+            
+            # accumulate loss
+            total_loss.append(loss.item()*batch_size)
+            total_batch_size += batch_size
+            
             if (i+1) % 100 == 0:
-                message = "Epoch [{}/{}], Step [{}/{}] Loss: {:.4f}" \
-                   .format(epoch+1, num_epochs, i+1, total_step, loss.item())
+                avg_loss = sum(total_loss)/total_batch_size
+                message = "Epoch [{}/{}], Step [{}/{}], AVG Loss: {:.4f}" \
+                   .format(epoch+1, num_epochs, i+1, total_step, avg_loss)
                 logging(
                     message=message,
                     path=os.path.join(config.root, "results/logs", config.experiment_title+".txt"),
@@ -49,7 +55,7 @@ def train(model, trainloader, testloaders, criterion, optimizer, config):
         # After each epoch, we evaluate on "cat and dog test images" and "test images from the other 8 classes"
         fractions_catdog_other8 = []
         for testloader in testloaders:
-            evaluation_results = evaluation(model, testloader, config)
+            evaluation_results = evaluation(model, testloader)
             fractions_catdog_other8.append(evaluation_results["fraction_of_class_a"])
         fractions.append(fractions_catdog_other8)
         
