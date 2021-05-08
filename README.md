@@ -10,6 +10,7 @@ Doc
 Link](https://docs.google.com/document/d/1z7QGX-cHNsR0Ab-Gnr2Ra1oR9J0Q2-ldhoV6gBT1XxM/edit)
 
 ## Project Organization
+--------
 
 ├── data
 │   ├── cifar-10-batches-py
@@ -55,3 +56,5 @@ Link](https://docs.google.com/document/d/1z7QGX-cHNsR0Ab-Gnr2Ra1oR9J0Q2-ldhoV6gB
     │
     └── utils
         └── utils.py
+
+--------
