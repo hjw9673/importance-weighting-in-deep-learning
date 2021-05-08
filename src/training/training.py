@@ -55,7 +55,7 @@ def train(model, trainloader, testloaders, criterion, optimizer, config):
         # After each epoch, we evaluate on "cat and dog test images" and "test images from the other 8 classes"
         fractions_catdog_other8 = []
         for testloader in testloaders:
-            evaluation_results = evaluation(model, testloader)
+            evaluation_results = evaluation(model, testloader, config)
             fractions_catdog_other8.append(evaluation_results["fraction_of_class_a"])
         fractions.append(fractions_catdog_other8)
         
