@@ -45,8 +45,8 @@ def set_arguments():
         '--lr', default=0.1, type=float,
         help='The learning rate.')
     parser.add_argument(
-        '--use_batchnorm', default=True, type=bool,
-        help='Whether we apply Batchnorm after each convolutional layer or not.')
+        '--use_batchnorm', default=1, type=int,
+        help='{1, 0}; Whether we apply Batchnorm after each convolutional layer or not.')
     parser.add_argument(
         '--num_classes', default=10, type=int,
         help='The number of class labels.')
