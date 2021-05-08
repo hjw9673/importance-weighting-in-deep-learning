@@ -15,7 +15,8 @@ from sklearn.metrics import classification_report
 import pickle
 
 # customized modules
-from src.utils.utils import set_seed, set_arguments
+from src.utils.utils import set_seed
+from src.config.config import set_arguments
 from src.models.models import *
 from src.training.training import *
 from src.data.get_dataloaders import *
