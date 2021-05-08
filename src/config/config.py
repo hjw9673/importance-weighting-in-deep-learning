@@ -39,8 +39,8 @@ def set_arguments():
         '--epoch', default=1000, type=int,
         help='The number of training epochs.')
     parser.add_argument(
-        '--download_cifar10', default=True, type=bool,
-        help='Whether we need to download Cifar10 dataset from the website or not.')
+        '--download_cifar10', default=1, type=int,
+        help='{1, 0}; Whether we need to download Cifar10 dataset from the website or not.')
     parser.add_argument(
         '--lr', default=0.1, type=float,
         help='The learning rate.')
