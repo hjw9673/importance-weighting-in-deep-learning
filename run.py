@@ -28,7 +28,7 @@ if __name__ == "__main__":
     config = set_arguments()
     set_seed(config.seeds)
     print("Use CUDA: {}".format(torch.cuda.is_available()))
-    
+
     # 2. read data
     loader_dict = create_dataloaders(
         data_dir=os.path.join(config.root, "data"), batch_size=config.batch_size,
