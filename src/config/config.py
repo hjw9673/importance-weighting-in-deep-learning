@@ -6,6 +6,9 @@ def set_arguments():
         '--model', type=str,
         help='{cnn, resnet}')
     parser.add_argument(
+        '--model_checkpoint', default='none', type=str,
+        help='Specify the name of a trained model checkpoint so that you can retrain it again. Leave it to "none" if you wanna train a new model.')
+    parser.add_argument(
         '--experiment_title', type=str,
         help='Set up the title of this experiment which will be the file name of model checkpoints and other pickle files.')
     parser.add_argument(

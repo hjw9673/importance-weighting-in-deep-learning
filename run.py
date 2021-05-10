@@ -39,7 +39,7 @@ if __name__ == "__main__":
     train_loader = loader_dict["train_loader"]
     test_ab_loader = loader_dict["test_ab_loader"]
     test_others_loader = loader_dict["test_others_loader"]
-    
+
     # 3. train model
     # 3-1. training requirements
     if config.model == "resnet":
@@ -51,20 +51,34 @@ if __name__ == "__main__":
         ).to(device)
     elif config.model == "cnn":
         model = CustomCNN(config.num_classes).to(device)
-
+    
+    # 3-2. optimizer
+    learning_rate = config.lr
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay=config.l2_penalty)
+    
+    # 3-3. retrain or initialize training
+    if config.model_checkpoint != "none" and config.model_checkpoint.endswith(".ckpt"):
+        print("Reload the model checkpoint: {}".format(config.model_checkpoint))
+        checkpoint = torch.load(os.path.join(config.root, "results/models", config.model_checkpoint))
+        model.load_state_dict(checkpoint['model_state_dict'])
+        model = model.to(device)
+        optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        reloaded_fractions = checkpoint['current_fraction_list']
+    elif config.model_checkpoint == "none":
+        reloaded_fractions = []
+    
+    # 3-4. loss function
     weights = torch.ones(config.num_classes)
     weights[config.class_a_index] = config.class_a_weight
     weights[config.class_b_index] = config.class_b_weight
     criterion = nn.CrossEntropyLoss(weight=weights.to(device))
-
-    learning_rate = config.lr
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay=config.l2_penalty)
     
-    # 3-2. start training
-    model_trained = train(model, train_loader, [test_ab_loader, test_others_loader], criterion, optimizer, config)
+    # 3-5. start training
+    model_trained = train(model, train_loader, [test_ab_loader, test_others_loader],
+                          criterion, optimizer, config, reloaded_fractions)
     
-    # 3-3. save model checkpoints
-    torch.save(
-        model_trained.state_dict(),
-        os.path.join(config.root, "results/models", config.experiment_title+".ckpt")
-    )
+    # 4. evaluate the model on the dog-cat testing images and save evaluation result
+    evaluation_results = evaluation(model_trained, test_ab_loader, config)
+    evaluation_file_path=os.path.join(config.root, "results/evaluation", config.experiment_title+".pkl")
+    with open(evaluation_file_path, "wb") as file:
+        pickle.dump(evaluation_results, file) 
