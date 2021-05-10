@@ -92,7 +92,7 @@ class ResNet(nn.Module):
                     conv3x3(self.in_channels, out_channels, stride=stride),
                     nn.BatchNorm2d(out_channels))
             else:
-                conv3x3(self.in_channels, out_channels, stride=stride)
+                downsample = conv3x3(self.in_channels, out_channels, stride=stride)
         layers = []
         layers.append(block(self.in_channels, out_channels, stride, downsample, use_batchnorm=self.use_batchnorm))
         self.in_channels = out_channels

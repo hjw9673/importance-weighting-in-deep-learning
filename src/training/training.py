@@ -6,7 +6,7 @@ from tqdm import tqdm
 from sklearn.metrics import classification_report
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-def train(model, trainloader, testloaders, criterion, optimizer, config):
+def train(model, trainloader, testloaders, criterion, optimizer, config, reloaded_fractions=[]):
     
     # Record training process
     logging(
@@ -18,7 +18,7 @@ def train(model, trainloader, testloaders, criterion, optimizer, config):
     # Start training
     total_step = len(trainloader)
     num_epochs = config.epoch
-    fractions = []
+    fractions = reloaded_fractions
     
     for epoch in range(num_epochs):
         total_loss = []
@@ -51,6 +51,18 @@ def train(model, trainloader, testloaders, criterion, optimizer, config):
                     path=os.path.join(config.root, "results/logs", config.experiment_title+".txt"),
                     mode="a+",
                 )
+        
+        # After each epoch, we save the model checkpoints
+        checkpoints = {
+            'epoch': epoch+1,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'current_fraction_list': fractions,
+        }
+        torch.save(
+            checkpoints,
+            os.path.join(config.root, "results/models", config.experiment_title+".ckpt")
+        )
                 
         # After each epoch, we evaluate on "cat and dog test images" and "test images from the other 8 classes"
         fractions_catdog_other8 = []
