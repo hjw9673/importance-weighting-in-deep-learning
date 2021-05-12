@@ -3,6 +3,9 @@ import argparse
 def set_arguments():
     parser = argparse.ArgumentParser(description='Set up arguments for this experiment.')
     parser.add_argument(
+        '--data_name', type=str,
+        help='{cifar10, mnist}')
+    parser.add_argument(
         '--model', type=str,
         help='{cnn, resnet}')
     parser.add_argument(
