@@ -3,21 +3,21 @@ import torch.nn as nn
 
 # Convolutional Networks
 class CustomCNN(nn.Module):
-    def __init__(self, num_classes):
+    def __init__(self, num_classes, image_channels=3):
         super(CustomCNN, self).__init__()
         self.conv_layers1 = nn.Sequential(
-            nn.Conv2d(3, 64, kernel_size=3, bias=True),
+            nn.Conv2d(image_channels, 64, kernel_size=3, bias=False),
             nn.ReLU(inplace=True),
-            nn.Conv2d(64, 64, kernel_size=3, bias=True),
+            nn.Conv2d(64, 64, kernel_size=3, bias=False),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2)
         )
         self.conv_layers2 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, bias=True),
+            nn.Conv2d(64, 128, kernel_size=3, bias=False),
             nn.ReLU(inplace=True),
-            nn.Conv2d(128, 128, kernel_size=3, bias=True),
+            nn.Conv2d(128, 128, kernel_size=3, bias=False),
             nn.ReLU(inplace=True),
-            nn.Conv2d(128, 128, kernel_size=3, bias=True),
+            nn.Conv2d(128, 128, kernel_size=3, bias=False),
             nn.ReLU(inplace=True),
             nn.MaxPool2d(2)
         )
@@ -108,11 +108,11 @@ class ResidualBlock(nn.Module):
     
     
 class ResNet(nn.Module):
-    def __init__(self, block, layers, num_classes=10, use_batchnorm=True):
+    def __init__(self, block, layers, image_channels=3, num_classes=10, use_batchnorm=True):
         super(ResNet, self).__init__()
         self.in_channels = 64
         self.use_batchnorm = use_batchnorm
-        self.conv = conv3x3(3, 64, kernel=5)
+        self.conv = conv3x3(image_channels, 64, kernel=5)
         self.bn = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
         self.layer1 = self.make_layer(block, 64, layers[0])

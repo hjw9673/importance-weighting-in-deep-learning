@@ -43,15 +43,21 @@ if __name__ == "__main__":
 
     # 3. train model
     # 3-1. training requirements
+    if config.data_name == "cifar10":
+        image_channels = 3
+    elif config.data_name == "mnist":
+        image_channels = 1
+        
     if config.model == "resnet":
         model = ResNet(
             block=ResidualBlock,
             layers=[2, 2, 2],
+            image_channels=image_channels,
             num_classes=config.num_classes,
             use_batchnorm=config.use_batchnorm
         ).to(device)
     elif config.model == "cnn":
-        model = CustomCNN(config.num_classes).to(device)
+        model = CustomCNN(config.num_classes, image_channels).to(device)
     
     # 3-2. optimizer
     learning_rate = config.lr

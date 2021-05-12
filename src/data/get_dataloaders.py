@@ -70,7 +70,7 @@ class CustomDataLoader:
             transform = transforms.Compose(
                 [transforms.Resize(32),
                  transforms.ToTensor(),
-                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+                 transforms.Normalize((0.5), (0.5))])
             trainset = torchvision.datasets.MNIST(
                 root=data_dir, train=True,
                 download=self.download, transform=transform
