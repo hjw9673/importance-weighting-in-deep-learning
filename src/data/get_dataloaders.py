@@ -5,17 +5,21 @@ import torchvision.transforms as transforms
 
 class CustomDataLoader:
     
-    def __init__(self, class_a_size=None, class_b_size=None, seeds=123, download=True):
+    def __init__(self, data_name, class_a_size=None, class_b_size=None, seeds=123, download=True):
         """
         Arguments:
             class_a_size: The number of samples for class a (e.g. dog).
             class_b_size: The number of samples for class b (e.g. cat).
         """
+        self.data_name = data_name
         self.class_a_size = class_a_size # e.g. 5000
         self.class_b_size = class_b_size # e.g. 5000
         self.seeds = seeds
-        self.classes = ['plane', 'car', 'bird', 'cat',
-                   'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        if self.data_name == "cifar10":
+            self.classes = ['plane', 'car', 'bird', 'cat',
+                       'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+        elif self.data_name == "mnist":
+            self.classes = list(range(10))
         self.download = download
         
     def sampling(self, indices, num, seeds=123):
@@ -49,33 +53,52 @@ class CustomDataLoader:
 
     def load_dataset(self, data_dir, batch_size, train_a_label=5, train_b_label=3):
         
-        transform = transforms.Compose(
-            [transforms.ToTensor(),
-             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        
-        # 1. read train data belonged to train_labels
-        trainset = torchvision.datasets.CIFAR10(root=data_dir, train=True,
-                                                download=self.download, transform=transform)
-        
-        # 1-1. get index belonged to class a and b with sampling
-        class_a_indices = self.get_subset_index(trainset.targets, [train_a_label])
+        # 1. read train and test data by data_name
+        if self.data_name == "cifar10":
+            transform = transforms.Compose(
+                [transforms.ToTensor(),
+                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+            trainset = torchvision.datasets.CIFAR10(
+                root=data_dir, train=True,
+                download=self.download, transform=transform
+            )
+            testset = torchvision.datasets.CIFAR10(
+                root=data_dir, train=False,
+                download=self.download, transform=transform
+            )
+        elif self.data_name == "mnist":
+            transform = transforms.Compose(
+                [transforms.Resize(32),
+                 transforms.ToTensor(),
+                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+            trainset = torchvision.datasets.MNIST(
+                root=data_dir, train=True,
+                download=self.download, transform=transform
+            )
+            testset = torchvision.datasets.MNIST(
+                root=data_dir, train=False,
+                download=self.download, transform=transform
+            )
+
+        # 2. get index belonged to class a and b with sampling
+        train_target_ls = trainset.targets.tolist() if torch.is_tensor(trainset.targets) else trainset.targets
+        class_a_indices = self.get_subset_index(train_target_ls, [train_a_label])
         class_a_indices = self.sampling(class_a_indices, self.class_a_size, self.seeds)
-        
-        class_b_indices = self.get_subset_index(trainset.targets, [train_b_label])
+
+        class_b_indices = self.get_subset_index(train_target_ls, [train_b_label])
         class_b_indices = self.sampling(class_b_indices, self.class_b_size, self.seeds)
         
         train_index_subset = np.concatenate((class_a_indices, class_b_indices)).tolist()
         trainsubset = torch.utils.data.Subset(trainset, train_index_subset)
 
-        # 1. read test data and separate them into (dog, cat) and (the other 8)
-        testset = torchvision.datasets.CIFAR10(root=data_dir, train=False,
-                                               download=self.download, transform=transform)
+        # 3. separate them into (dog, cat) and (the other 8)
+        test_target_ls = testset.targets.tolist() if torch.is_tensor(testset.targets) else testset.targets
         test_index_class_ab = self.get_subset_index(
-            labels=testset.targets,
+            labels=test_target_ls,
             targets=[train_a_label, train_b_label]
         )
         test_index_others = self.get_subset_index(
-            labels=testset.targets,
+            labels=test_target_ls,
             targets=[cls for cls in range(len(self.classes)) if cls not in [train_a_label, train_b_label]]
         )
         testsubset_ab = torch.utils.data.Subset(testset, test_index_class_ab)
@@ -87,19 +110,22 @@ class CustomDataLoader:
         dataloader = torch.utils.data.DataLoader(
             dataset,
             batch_size=batch_size,
-            shuffle=True,
-            drop_last=True
+            shuffle=shuffle,
+            drop_last=drop_last
         )
         return dataloader
 
     
-def create_dataloaders(data_dir, batch_size, class_a_size, class_a_index,
+def create_dataloaders(data_name, data_dir, batch_size, class_a_size, class_a_index,
                        class_b_size, class_b_index, seeds, download_cifar10):
+    
     mydataloader = CustomDataLoader(
-    class_a_size=class_a_size,
-    class_b_size=class_b_size,
-    seeds=seeds,
-    download=download_cifar10)
+        data_name=data_name,
+        class_a_size=class_a_size,
+        class_b_size=class_b_size,
+        seeds=seeds,
+        download=download_cifar10
+    )
 
     trainset, (testset, testset_ab, testset_others) = mydataloader.load_dataset(
         data_dir=data_dir,

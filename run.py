@@ -31,6 +31,7 @@ if __name__ == "__main__":
 
     # 2. read data
     loader_dict = create_dataloaders(
+        data_name=config.data_name,
         data_dir=os.path.join(config.root, "data"), batch_size=config.batch_size,
         class_a_size=config.class_a_size, class_a_index=config.class_a_index,
         class_b_size=config.class_b_size, class_b_index=config.class_b_index,
